@@ -3,6 +3,9 @@ import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import session from "cookie-session";
 import { config } from "./config/app.config";
+import connectDatabase from "./config/database.config";
+import { error } from "console";
+import { errorHandler } from "./middleware/errorHandler.middleware";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -26,7 +29,8 @@ app.use(
   cors({
     origin: config.FRONTEND_ORIGIN,
     credentials: true
-}));
+  }
+));
 
 app.get(`/`, (req: Request, res: Response, next: NextFunction) => {
   res.status(200).json({
@@ -34,6 +38,9 @@ app.get(`/`, (req: Request, res: Response, next: NextFunction) => {
   })
 });
 
+app.use(errorHandler);
+
 app.listen(config.PORT, async () => {
   console.log(`Server is running on http://localhost:${config.PORT} in ${config.NODE_ENV} mode`);
+  await connectDatabase();
 });

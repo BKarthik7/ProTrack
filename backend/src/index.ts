@@ -4,8 +4,11 @@ import cors from "cors";
 import session from "cookie-session";
 import { config } from "./config/app.config";
 import connectDatabase from "./config/database.config";
-import { error } from "console";
-import { errorHandler } from "./middleware/errorHandler.middleware";
+import { errorHandler } from "./middlewares/errorHandler.middleware";
+import { HTTPSTATUS } from "./config/http.config";
+import { asyncHandler } from "./middlewares/asyncHandler.middleware";
+import { BadRequestException } from "./utils/appError";
+import { ErrorCodeEnum } from "./enums/error-code.enum";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
@@ -32,11 +35,18 @@ app.use(
   }
 ));
 
-app.get(`/`, (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).json({
-    message: "Hello World"
+app.get(
+  `/`,
+  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    throw new BadRequestException(
+      "This is a bad request",
+      ErrorCodeEnum.AUTH_INVALID_TOKEN
+    );
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Hello World",
+    });
   })
-});
+);
 
 app.use(errorHandler);
 
